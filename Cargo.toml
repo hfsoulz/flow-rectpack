@@ -1,0 +1,14 @@
+[package]
+name = "flow-rectpack"
+version = "0.1.0"
+edition = "2024"
+authors = ["Andreas Widen <aw@luflow.net>"]
+description = "flow-rectpack is a library for packing rectangles into two-dimensional finite bins."
+license = "Zlib"
+repository = "https://git.luflow.net/hfsoulz/flow-rectpack.git"
+readme = "README.md"
+documentation = "https://git.luflow.net/hfsoulz/flow-rectpack.git"
+keywords = ["rectangles", "rect", "bin", "packing"]
+exclude = [".github", "/ci/*"]
+
+[dependencies]

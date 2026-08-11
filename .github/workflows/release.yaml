@@ -1,0 +1,26 @@
+name: Create Github Release (without assets)
+
+on:
+    push:
+        tags:
+            - 'v*' # Trigger when a version tag is pushed (e.g., v0.1.0)
+
+jobs:
+    release:
+        name: Create Github Release
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+
+            - run: cargo install git-cliff
+            - run: git-cliff --latest --strip header -o CHANGES.md
+            - run: cat CHANGES.md
+
+            - uses: ncipollo/release-action@v1
+              with:
+                  name: ${{ github.ref_name }} released
+                  bodyFile: 'CHANGES.md'
+                  token: ${{ secrets.WRITE_TOKEN }}
