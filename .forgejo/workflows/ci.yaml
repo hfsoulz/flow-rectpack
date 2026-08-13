@@ -3,7 +3,7 @@ on:
     pull_request:
 
 jobs:
-    rustfmt:
+    test:
         name: Rust CI Check/Build/Test
         runs-on: ubuntu-latest
         env:
