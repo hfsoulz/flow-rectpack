@@ -33,15 +33,15 @@
 //! assert_eq!(rbp.get_occupancy(), 0.0);
 //!
 //! // add a few rects that should fit:
-//! assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-//! assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
+//! assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+//! assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
 //! assert_eq!(rbp.get_occupancy(), 0.5);
-//! assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-//! assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
+//! assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+//! assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
 //! assert_eq!(rbp.get_occupancy(), 1.0);
 //!
 //! // this rect will not fit and therefore returns None:
-//! assert_eq!(rbp.insert(1, 1, FreeRectHeuristic::BottomLeft).is_none(), true);
+//! assert!(rbp.insert(1, 1, FreeRectHeuristic::BottomLeft).is_none());
 //!
 //! ```
 

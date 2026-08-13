@@ -18,7 +18,7 @@ Add this to your `Cargo.toml`:
 
 ```
 [dependencies]
-flow-rectpack = { git = "https://git.luflow.net/hfsoulz/flow-rectpack.git", tag = "v0.1.0" }
+flow-rectpack = { git = "https://git.luflow.net/hfsoulz/flow-rectpack.git", tag = "v0.2.0" }
 ```
 
 Then:
@@ -34,15 +34,15 @@ let mut rbp = RectsBinPack::new(32, 32, true).unwrap();
 assert_eq!(rbp.get_occupancy(), 0.0);
 
 // add a few rects that should fit:
-assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-assert_eq!(rbp.get_occupancy(), 0.5);
-assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-assert_eq!(rbp.get_occupancy(), 1.0);
+assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+assert!(rbp.get_occupancy(), 0.5);
+assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+assert!(rbp.get_occupancy(), 1.0);
 
 // this rect will not fit and therefore returns None:
-assert_eq!(rbp.insert(1, 1, FreeRectHeuristic::BottomLeft).is_none(), true);
+assert!(rbp.insert(1, 1, FreeRectHeuristic::BottomLeft).is_none());
 
 ```
 

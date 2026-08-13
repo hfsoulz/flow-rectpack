@@ -77,7 +77,7 @@ impl Rect2D {
     /// assert_eq!(rect.height, 16);
     ///
     /// // this should fail:
-    /// assert_eq!(Rect2D::with_details(0, 0, 0, 0).is_err(), true);
+    /// assert!(Rect2D::with_details(0, 0, 0, 0).is_err());
     /// ```
     pub fn with_details(
         x: i32,
@@ -139,8 +139,8 @@ impl RectsBinPack {
     /// use flow_rectpack::FreeRectHeuristic;
     ///
     /// let mut rbp = RectsBinPack::new(32, 32, false).unwrap();
-    /// assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-    /// assert_eq!(rbp.insert(33, 33, FreeRectHeuristic::BottomLeft).is_none(), true);
+    /// assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+    /// assert!(rbp.insert(33, 33, FreeRectHeuristic::BottomLeft).is_none());
     /// ```
     pub fn new(width: i32, height: i32, allow_flip: bool) -> Result<Self, RectsBinPackError> {
         if width > 0 && height > 0 {
@@ -171,8 +171,8 @@ impl RectsBinPack {
     /// use flow_rectpack::FreeRectHeuristic;
     ///
     /// let mut rbp = RectsBinPack::new(32, 32, false).unwrap();
-    /// assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
-    /// assert_eq!(rbp.insert(33, 33, FreeRectHeuristic::BottomLeft).is_none(), true);
+    /// assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
+    /// assert!(rbp.insert(33, 33, FreeRectHeuristic::BottomLeft).is_none());
     /// ```
     pub fn insert(
         &mut self,
@@ -220,13 +220,13 @@ impl RectsBinPack {
     /// // occupancy should be 0.0 initially:
     /// assert_eq!(rbp.get_occupancy(), 0.0);
     ///
-    /// assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
+    /// assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
     /// assert_eq!(rbp.get_occupancy(), 0.25);
-    /// assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
+    /// assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
     /// assert_eq!(rbp.get_occupancy(), 0.5);
-    /// assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
+    /// assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
     /// assert_eq!(rbp.get_occupancy(), 0.75);
-    /// assert_eq!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(), true);
+    /// assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
     ///
     /// // occupancy should now be full as in 1.0:
     /// assert_eq!(rbp.get_occupancy(), 1.0);
