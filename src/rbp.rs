@@ -716,28 +716,15 @@ mod tests {
         let mut rbp = RectsBinPack::new(32, 32, false).unwrap();
         assert_eq!(rbp.get_occupancy(), 0.0);
 
-        assert_eq!(
+        assert!(
             rbp.insert(16, 16, FreeRectHeuristic::ShortSideFit)
-                .is_some(),
-            true
+                .is_some()
         );
-        assert_eq!(
-            rbp.insert(16, 16, FreeRectHeuristic::LongSideFit).is_some(),
-            true
-        );
-        assert_eq!(
-            rbp.insert(16, 16, FreeRectHeuristic::AreaFit).is_some(),
-            true
-        );
-        assert_eq!(
-            rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some(),
-            true
-        );
+        assert!(rbp.insert(16, 16, FreeRectHeuristic::LongSideFit).is_some());
+        assert!(rbp.insert(16, 16, FreeRectHeuristic::AreaFit).is_some());
+        assert!(rbp.insert(16, 16, FreeRectHeuristic::BottomLeft).is_some());
         assert_eq!(rbp.get_occupancy(), 1.0);
 
-        assert_eq!(
-            rbp.insert(1, 1, FreeRectHeuristic::ContactPoint).is_none(),
-            true
-        );
+        assert!(rbp.insert(1, 1, FreeRectHeuristic::ContactPoint).is_none());
     }
 }
