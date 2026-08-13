@@ -35,7 +35,7 @@ pub enum RectsBinPackError {
 }
 
 /// Specifies the properties of a 2D rectangle.
-#[derive(Clone, Debug)]
+#[derive(Default, Clone, Debug)]
 pub struct Rect2D {
     /// is the x offset
     pub x: i32,
@@ -51,28 +51,6 @@ pub struct Rect2D {
 }
 
 impl Rect2D {
-    /// Instantiates a 2D rectangle of size (0, 0, 0, 0).
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// use flow_rectpack::Rect2D;
-    ///
-    /// let rect = Rect2D::new();
-    /// assert_eq!(rect.x, 0);
-    /// assert_eq!(rect.y, 0);
-    /// assert_eq!(rect.width, 0);
-    /// assert_eq!(rect.height, 0);
-    /// ```
-    pub fn new() -> Self {
-        Self {
-            x: 0,
-            y: 0,
-            width: 0,
-            height: 0,
-        }
-    }
-
     /// Instantiates a 2D rectangle with given size properties.
     ///
     /// # Arguments
@@ -147,7 +125,7 @@ impl RectsBinPack {
     /// * `width` - is the width of the bin
     /// * `height` - is the height of the bin
     /// * `allow_flip` - is the flag indicating whether the packing algorithm is allowed to rotate
-    /// the input rectangle 90 degrees clockwise to consider a better placement.
+    ///   the input rectangle 90 degrees clockwise to consider a better placement.
     ///
     /// # Errors
     ///
@@ -210,26 +188,23 @@ impl RectsBinPack {
             FreeRectHeuristic::AreaFit => self.get_rect_for_best_area_fit(width, height),
         };
 
-        if let Some(new_rect) = output {
-            let mut i: usize = 0;
-            while i < self.free_rects.len() {
-                if let Some(free_rect) = self.free_rects.get(i) {
-                    if self.is_split_free_node(&free_rect.clone(), &new_rect) {
-                        self.free_rects.remove(i);
-                        continue;
-                    }
-                }
-
-                i += 1;
+        let new_rect = output?;
+        let mut i: usize = 0;
+        while i < self.free_rects.len() {
+            if let Some(free_rect) = self.free_rects.get(i)
+                && self.is_split_free_node(&free_rect.clone(), &new_rect)
+            {
+                self.free_rects.remove(i);
+                continue;
             }
 
-            self.prune_free_list();
-            self.used_rects.push(new_rect.clone());
-
-            return Some(new_rect);
-        } else {
-            return None;
+            i += 1;
         }
+
+        self.prune_free_list();
+        self.used_rects.push(new_rect.clone());
+
+        Some(new_rect)
     }
 
     /// Computes the ratio of used surface area to the total bin area.
@@ -266,7 +241,7 @@ impl RectsBinPack {
         }
 
         // return occupancy:
-        return used_surface_area as f32 / (self.width * self.height) as f32;
+        used_surface_area as f32 / (self.width * self.height) as f32
     }
 
     /// Computes the placement score for the contact point variant.
@@ -303,46 +278,43 @@ impl RectsBinPack {
             }
         }
 
-        return score;
+        score
     }
 
     /// Computes the rect for bottom left placement variant.
     fn get_rect_for_bottom_left(&self, width: i32, height: i32) -> Option<Rect2D> {
-        let mut new_rect = Rect2D::new();
+        let mut new_rect = Rect2D::default();
 
-        let mut best_x = std::i32::MAX;
-        let mut best_y = std::i32::MAX;
+        let mut best_x = i32::MAX;
+        let mut best_y = i32::MAX;
 
         for i in 0..self.free_rects.len() {
-            if let Some(free_rect) = self.free_rects.get(i) {
-                // true to place the rect in upright (non-flipped) orientation:
-                if free_rect.width >= width && free_rect.height >= height {
-                    let top_side_y = free_rect.y + height;
+            let free_rect = self.free_rects.get(i)?;
+            // true to place the rect in upright (non-flipped) orientation:
+            if free_rect.width >= width && free_rect.height >= height {
+                let top_side_y = free_rect.y + height;
 
-                    if top_side_y < best_y || (top_side_y == best_y && free_rect.x < best_x) {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = width;
-                        new_rect.height = height;
-                        best_x = free_rect.x;
-                        best_y = top_side_y;
-                    }
+                if top_side_y < best_y || (top_side_y == best_y && free_rect.x < best_x) {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = width;
+                    new_rect.height = height;
+                    best_x = free_rect.x;
+                    best_y = top_side_y;
                 }
+            }
 
-                if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
-                    let top_side_y = free_rect.y + width;
+            if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
+                let top_side_y = free_rect.y + width;
 
-                    if top_side_y < best_y || (top_side_y == best_y && free_rect.x < best_x) {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = height;
-                        new_rect.height = width;
-                        best_x = free_rect.x;
-                        best_y = top_side_y;
-                    }
+                if top_side_y < best_y || (top_side_y == best_y && free_rect.x < best_x) {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = height;
+                    new_rect.height = width;
+                    best_x = free_rect.x;
+                    best_y = top_side_y;
                 }
-            } else {
-                return None;
             }
         }
 
@@ -350,60 +322,56 @@ impl RectsBinPack {
             return None;
         }
 
-        return Some(new_rect);
+        Some(new_rect)
     }
 
     /// Computes the rect for short side fit variant.
     fn get_rect_for_best_short_side_fit(&self, width: i32, height: i32) -> Option<Rect2D> {
-        let mut new_rect = Rect2D::new();
+        let mut new_rect = Rect2D::default();
 
-        let mut best_short_side_fit = std::i32::MAX;
-        let mut best_long_side_fit = std::i32::MAX;
+        let mut best_short_side_fit = i32::MAX;
+        let mut best_long_side_fit = i32::MAX;
 
         for i in 0..self.free_rects.len() {
-            if let Some(free_rect) = self.free_rects.get(i) {
-                // try to place the rect in upright (non-flipped) orientation:
-                if free_rect.width >= width && free_rect.height >= height {
-                    let left_over_horiz = free_rect.width - width;
-                    let left_over_vert = free_rect.height - height;
-                    let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
-                    let long_side_fit = std::cmp::max(left_over_horiz, left_over_vert);
+            let free_rect = self.free_rects.get(i)?;
+            // try to place the rect in upright (non-flipped) orientation:
+            if free_rect.width >= width && free_rect.height >= height {
+                let left_over_horiz = free_rect.width - width;
+                let left_over_vert = free_rect.height - height;
+                let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
+                let long_side_fit = std::cmp::max(left_over_horiz, left_over_vert);
 
-                    if short_side_fit < best_short_side_fit
-                        || (short_side_fit == best_short_side_fit
-                            && long_side_fit < best_long_side_fit)
-                    {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = width;
-                        new_rect.height = height;
-                        best_short_side_fit = short_side_fit;
-                        best_long_side_fit = long_side_fit;
-                    }
+                if short_side_fit < best_short_side_fit
+                    || (short_side_fit == best_short_side_fit && long_side_fit < best_long_side_fit)
+                {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = width;
+                    new_rect.height = height;
+                    best_short_side_fit = short_side_fit;
+                    best_long_side_fit = long_side_fit;
                 }
+            }
 
-                if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
-                    let flipped_left_over_horiz = free_rect.width - height;
-                    let flipped_left_over_vert = free_rect.height - width;
-                    let flipped_short_side_fit =
-                        std::cmp::min(flipped_left_over_horiz, flipped_left_over_vert);
-                    let flipped_long_side_fit =
-                        std::cmp::max(flipped_left_over_horiz, flipped_left_over_vert);
+            if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
+                let flipped_left_over_horiz = free_rect.width - height;
+                let flipped_left_over_vert = free_rect.height - width;
+                let flipped_short_side_fit =
+                    std::cmp::min(flipped_left_over_horiz, flipped_left_over_vert);
+                let flipped_long_side_fit =
+                    std::cmp::max(flipped_left_over_horiz, flipped_left_over_vert);
 
-                    if flipped_short_side_fit < best_short_side_fit
-                        || (flipped_short_side_fit == best_short_side_fit
-                            && flipped_long_side_fit < best_long_side_fit)
-                    {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = height;
-                        new_rect.height = width;
-                        best_short_side_fit = flipped_short_side_fit;
-                        best_long_side_fit = flipped_long_side_fit;
-                    }
+                if flipped_short_side_fit < best_short_side_fit
+                    || (flipped_short_side_fit == best_short_side_fit
+                        && flipped_long_side_fit < best_long_side_fit)
+                {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = height;
+                    new_rect.height = width;
+                    best_short_side_fit = flipped_short_side_fit;
+                    best_long_side_fit = flipped_long_side_fit;
                 }
-            } else {
-                return None;
             }
         }
 
@@ -411,58 +379,53 @@ impl RectsBinPack {
             return None;
         }
 
-        return Some(new_rect);
+        Some(new_rect)
     }
 
     /// Computes the rect for long side fit variant.
     fn get_rect_for_best_long_side_fit(&self, width: i32, height: i32) -> Option<Rect2D> {
-        let mut new_rect = Rect2D::new();
+        let mut new_rect = Rect2D::default();
 
-        let mut best_short_side_fit = std::i32::MAX;
-        let mut best_long_side_fit = std::i32::MAX;
+        let mut best_short_side_fit = i32::MAX;
+        let mut best_long_side_fit = i32::MAX;
 
         for i in 0..self.free_rects.len() {
-            if let Some(free_rect) = self.free_rects.get(i) {
-                // try to place the rect in upright (non-flipped) orientation:
-                if free_rect.width >= width && free_rect.height >= height {
-                    let left_over_horiz = free_rect.width - width;
-                    let left_over_vert = free_rect.height - height;
-                    let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
-                    let long_side_fit = std::cmp::max(left_over_horiz, left_over_vert);
+            let free_rect = self.free_rects.get(i)?;
+            // try to place the rect in upright (non-flipped) orientation:
+            if free_rect.width >= width && free_rect.height >= height {
+                let left_over_horiz = free_rect.width - width;
+                let left_over_vert = free_rect.height - height;
+                let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
+                let long_side_fit = std::cmp::max(left_over_horiz, left_over_vert);
 
-                    if long_side_fit < best_long_side_fit
-                        || (long_side_fit == best_long_side_fit
-                            && short_side_fit < best_short_side_fit)
-                    {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = width;
-                        new_rect.height = height;
-                        best_short_side_fit = short_side_fit;
-                        best_long_side_fit = long_side_fit;
-                    }
+                if long_side_fit < best_long_side_fit
+                    || (long_side_fit == best_long_side_fit && short_side_fit < best_short_side_fit)
+                {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = width;
+                    new_rect.height = height;
+                    best_short_side_fit = short_side_fit;
+                    best_long_side_fit = long_side_fit;
                 }
+            }
 
-                if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
-                    let left_over_horiz = free_rect.width - height;
-                    let left_over_vert = free_rect.height - width;
-                    let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
-                    let long_side_fit = std::cmp::max(left_over_horiz, left_over_vert);
+            if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
+                let left_over_horiz = free_rect.width - height;
+                let left_over_vert = free_rect.height - width;
+                let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
+                let long_side_fit = std::cmp::max(left_over_horiz, left_over_vert);
 
-                    if long_side_fit < best_long_side_fit
-                        || (long_side_fit == best_long_side_fit
-                            && short_side_fit < best_short_side_fit)
-                    {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = height;
-                        new_rect.height = width;
-                        best_short_side_fit = short_side_fit;
-                        best_long_side_fit = long_side_fit;
-                    }
+                if long_side_fit < best_long_side_fit
+                    || (long_side_fit == best_long_side_fit && short_side_fit < best_short_side_fit)
+                {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = height;
+                    new_rect.height = width;
+                    best_short_side_fit = short_side_fit;
+                    best_long_side_fit = long_side_fit;
                 }
-            } else {
-                return None;
             }
         }
 
@@ -470,56 +433,53 @@ impl RectsBinPack {
             return None;
         }
 
-        return Some(new_rect);
+        Some(new_rect)
     }
 
     /// Computes the rect for best area fit variant.
     fn get_rect_for_best_area_fit(&self, width: i32, height: i32) -> Option<Rect2D> {
-        let mut new_rect = Rect2D::new();
+        let mut new_rect = Rect2D::default();
 
-        let mut best_area_fit = std::i32::MAX;
-        let mut best_short_side_fit = std::i32::MAX;
+        let mut best_area_fit = i32::MAX;
+        let mut best_short_side_fit = i32::MAX;
 
         for i in 0..self.free_rects.len() {
-            if let Some(free_rect) = self.free_rects.get(i) {
-                let area_fit = free_rect.width * free_rect.height - width * height;
+            let free_rect = self.free_rects.get(i)?;
+            let area_fit = free_rect.width * free_rect.height - width * height;
 
-                // try to place rect in upright (non-flipped) orientation:
-                if free_rect.width >= width && free_rect.height >= height {
-                    let left_over_horiz = free_rect.width - width;
-                    let left_over_vert = free_rect.height - height;
-                    let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
+            // try to place rect in upright (non-flipped) orientation:
+            if free_rect.width >= width && free_rect.height >= height {
+                let left_over_horiz = free_rect.width - width;
+                let left_over_vert = free_rect.height - height;
+                let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
 
-                    if area_fit < best_area_fit
-                        || (area_fit == best_area_fit && short_side_fit < best_short_side_fit)
-                    {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = width;
-                        new_rect.height = height;
-                        best_short_side_fit = short_side_fit;
-                        best_area_fit = area_fit;
-                    }
+                if area_fit < best_area_fit
+                    || (area_fit == best_area_fit && short_side_fit < best_short_side_fit)
+                {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = width;
+                    new_rect.height = height;
+                    best_short_side_fit = short_side_fit;
+                    best_area_fit = area_fit;
                 }
+            }
 
-                if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
-                    let left_over_horiz = free_rect.width - height;
-                    let left_over_vert = free_rect.height - width;
-                    let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
+            if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
+                let left_over_horiz = free_rect.width - height;
+                let left_over_vert = free_rect.height - width;
+                let short_side_fit = std::cmp::min(left_over_horiz, left_over_vert);
 
-                    if area_fit < best_area_fit
-                        || (area_fit == best_area_fit && short_side_fit < best_short_side_fit)
-                    {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = height;
-                        new_rect.height = width;
-                        best_short_side_fit = short_side_fit;
-                        best_area_fit = area_fit;
-                    }
+                if area_fit < best_area_fit
+                    || (area_fit == best_area_fit && short_side_fit < best_short_side_fit)
+                {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = height;
+                    new_rect.height = width;
+                    best_short_side_fit = short_side_fit;
+                    best_area_fit = area_fit;
                 }
-            } else {
-                return None;
             }
         }
 
@@ -527,44 +487,41 @@ impl RectsBinPack {
             return None;
         }
 
-        return Some(new_rect);
+        Some(new_rect)
     }
 
     /// Computes the rect for contact point variant.
     fn get_rect_for_contact_point(&self, width: i32, height: i32) -> Option<Rect2D> {
-        let mut new_rect = Rect2D::new();
+        let mut new_rect = Rect2D::default();
         let mut best_contact_score = -1;
 
         for i in 0..self.free_rects.len() {
-            if let Some(free_rect) = self.free_rects.get(i) {
-                // try to place the rect in upright (non-flipped) orientation:
-                if free_rect.width >= width && free_rect.height >= height {
-                    let contact_score =
-                        self.get_score_for_contact_point(free_rect.x, free_rect.y, width, height);
+            let free_rect = self.free_rects.get(i)?;
+            // try to place the rect in upright (non-flipped) orientation:
+            if free_rect.width >= width && free_rect.height >= height {
+                let contact_score =
+                    self.get_score_for_contact_point(free_rect.x, free_rect.y, width, height);
 
-                    if contact_score > best_contact_score {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = width;
-                        new_rect.height = height;
-                        best_contact_score = contact_score;
-                    }
+                if contact_score > best_contact_score {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = width;
+                    new_rect.height = height;
+                    best_contact_score = contact_score;
                 }
+            }
 
-                if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
-                    let contact_score =
-                        self.get_score_for_contact_point(free_rect.x, free_rect.y, height, width);
+            if self.allow_flip && free_rect.width >= height && free_rect.height >= width {
+                let contact_score =
+                    self.get_score_for_contact_point(free_rect.x, free_rect.y, height, width);
 
-                    if contact_score > best_contact_score {
-                        new_rect.x = free_rect.x;
-                        new_rect.y = free_rect.y;
-                        new_rect.width = height;
-                        new_rect.height = width;
-                        best_contact_score = contact_score;
-                    }
+                if contact_score > best_contact_score {
+                    new_rect.x = free_rect.x;
+                    new_rect.y = free_rect.y;
+                    new_rect.width = height;
+                    new_rect.height = width;
+                    best_contact_score = contact_score;
                 }
-            } else {
-                return None;
             }
         }
 
@@ -572,7 +529,7 @@ impl RectsBinPack {
             return None;
         }
 
-        return Some(new_rect);
+        Some(new_rect)
     }
 
     /// returns true if the free rect was split
@@ -624,7 +581,7 @@ impl RectsBinPack {
             }
         }
 
-        return true;
+        true
     }
 
     /// goes through the free rect list and removes any redundant entries
@@ -643,10 +600,10 @@ impl RectsBinPack {
                         break;
                     }
 
-                    if self.is_contained_on(free_rect_j, free_rect_i) {
-                        if let Some(value) = keep.get_mut(j) {
-                            *value = false;
-                        }
+                    if self.is_contained_on(free_rect_j, free_rect_i)
+                        && let Some(value) = keep.get_mut(j)
+                    {
+                        *value = false;
                     }
                 }
             }
@@ -659,10 +616,10 @@ impl RectsBinPack {
 
     /// determine whether rect A is contained on rect B
     fn is_contained_on(&self, a: &Rect2D, b: &Rect2D) -> bool {
-        return a.x >= b.x
+        a.x >= b.x
             && a.y >= b.y
             && a.x + a.width <= b.x + b.width
-            && a.y + a.height <= b.y + b.height;
+            && a.y + a.height <= b.y + b.height
     }
 
     /// returns 0 if the two intervals i1 and i2 are disjoint, or the length of their
@@ -678,7 +635,7 @@ impl RectsBinPack {
             return 0;
         }
 
-        return std::cmp::min(i1_end, i2_end) - std::cmp::max(i1_start, i2_start);
+        std::cmp::min(i1_end, i2_end) - std::cmp::max(i1_start, i2_start)
     }
 } // impl RectsBinPack
 
@@ -689,7 +646,7 @@ mod tests {
 
     #[test]
     fn rect2d_basics() {
-        let rect = Rect2D::new();
+        let rect = Rect2D::default();
 
         assert_eq!(rect.x, 0);
         assert_eq!(rect.y, 0);
