@@ -1,15 +1,15 @@
 [package]
 name = "flow-rectpack"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 authors = ["Andreas Widen <aw@luflow.net>"]
 description = "flow-rectpack is a library for packing rectangles into two-dimensional finite bins."
 license = "Zlib"
-homepage = "https://git.luflow.net/hfsoulz/flow-rectpack.git"
-repository = "https://git.luflow.net/hfsoulz/flow-rectpack.git"
+homepage = "https://luflow.net/"
+repository = "https://github.com/hfsoulz/flow-rectpack.git"
 readme = "README.md"
-documentation = "https://git.luflow.net/hfsoulz/flow-rectpack.git"
-keywords = ["rect-bin-packing", "rectangles-bin-packing", "bin", "packing"]
-exclude = [".github", "/ci/*"]
+documentation = "https://github.com/hfsoulz/flow-rectpack.git"
+keywords = ["rect", "rectangles", "bin", "packing"]
+exclude = [".github", ".forgejo", ".gitignore"]
 
 [dependencies]
