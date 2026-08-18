@@ -8,7 +8,6 @@ license = "Zlib"
 homepage = "https://luflow.net/"
 repository = "https://github.com/hfsoulz/flow-rectpack.git"
 readme = "README.md"
-documentation = "https://github.com/hfsoulz/flow-rectpack.git"
 keywords = ["rect", "rectangles", "bin", "packing"]
 exclude = [".github", ".forgejo", ".gitignore"]
 
