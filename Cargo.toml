@@ -1,6 +1,6 @@
 [package]
 name = "flow-rectpack"
-version = "0.2.2"
+version = "0.2.3"
 edition = "2024"
 authors = ["Andreas Widen <aw@luflow.net>"]
 description = "flow-rectpack is a library for packing rectangles into two-dimensional finite bins."
