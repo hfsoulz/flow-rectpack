@@ -9,6 +9,6 @@ homepage = "https://luflow.net/"
 repository = "https://github.com/hfsoulz/flow-rectpack.git"
 readme = "README.md"
 keywords = ["rect", "rectangles", "bin", "packing"]
-exclude = [".github", ".forgejo", ".gitignore"]
+exclude = [".github", ".forgejo", ".gitignore", "CODE_OF_CONDUCT.md", "CONTRIBUTING.md", "SECURITY.md"]
 
 [dependencies]
