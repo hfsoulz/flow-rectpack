@@ -8,7 +8,6 @@ Contributions can be made here:
 
 - https://git.luflow.net/hfsoulz/flow-rectpack.git (main development)
 - https://codeberg.org/hfsoulz/flow-rectpack.git (mirror)
-- https://github.com/hfsoulz/flow-rectpack.git (mirror)
 
 ## Install Rust
 
