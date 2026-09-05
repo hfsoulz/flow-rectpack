@@ -6,8 +6,8 @@ issues, new features are all ways of contributing and greatly appreciated!
 
 Contributions can be made here:
 
-- https://git.luflow.net/hfsoulz/flow-rectpack.git (main development)
-- https://codeberg.org/hfsoulz/flow-rectpack.git (mirror)
+- https://codeberg.org/hfsoulz/flow-rectpack.git
+- https://github.com/hfsoulz/flow-rectpack.git
 
 ## Install Rust
 
